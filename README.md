@@ -15,7 +15,9 @@ https://raw.githubusercontent.com/hanboyd/Shadowrocket-Rules/main/HB-Shadowrocke
 - **AI / 银行 / 券商稳定出口** — 使用 `select` 手动选择，避免 `url-test` 自动切换 IP
 - **YouTube 规则集前置** — `Google.list` 含 `DOMAIN-KEYWORD,google`，若排在前面会把 `googlevideo.com`（油管视频流）划入谷歌服务组，导致油管视频与 API 走错出口
 - **补齐 Google 新 AI 端点** — `aiplatform` / `cloudcode-pa` / `gems-pa` / `generativelanguage-pa` / `aisuite-pa` 等 `googleapis.com` 子域原本会被 Google 规则集通配吞掉
-- **Global 规则集成对引用** — `Global.list` 只含 IP/UA/关键词规则（头部 `TOTAL 35323` 是全量统计），35k 域名主体在 `Global_Domain.list`，两者必须同时使用，否则「🌍 非中国」几乎是空壳
+- **Global 规则集成对引用** — `Global.list` 实际只有 201 条（头部 `TOTAL: 35323` 是上游对整个 Global 集的统计口径，不等于本文件行数），35k 域名主体在 `Global_Domain.list`，两者必须同时使用，否则「🌍 非中国」几乎是空壳
+- **ChinaMax 与 Global 交集剥离** — 少数域名同时出现在国内直连集与全球代理集；经规则模拟器全量比对后，对 2 条上游归类为境外、但会被 ChinaMax 抢先直连的域名（`cdn.angruo.com`、`ztedevices.com`）在 ChinaMax 之前显式剥离改走代理，其余交集项已被前置规则正确拦截
+- **Tailscale 域名规则补齐** — 官方手册建议用 `DOMAIN-SUFFIX,ts.net` / `DOMAIN-WILDCARD,tail*.ts.net` 覆盖 MagicDNS 解析结果，仅有 `IP-CIDR,100.64.0.0/10` 会让 `*.ts.net` 主机名绕过隧道；补齐域名规则与 `fd7a:115c:a1e0::/48` IPv6 段
 - **区域正则词边界** — 裸 `US`/`TW` 会误命中 `PLUS`/`BUS`/`RUS`/`AUS`/`MUST`/`NETWORK`；改为 `(?:^|[^A-Za-z])US(?:[^A-Za-z]|$)` 并补齐 `川日`/`关西`/`圣何塞`/`硅谷`/`Phoenix` 等别名
 - **其他节点排除订阅信息伪节点** — 「剩余流量」「套餐到期」「Traffic」「Expiry」「在线客服」等条目不再污染测速池
 - **业务组首选统一为 🚀 节点选择** — 区域自动组降为次选，只订阅部分地区节点的用户也不会遇到空策略组
@@ -24,7 +26,7 @@ https://raw.githubusercontent.com/hanboyd/Shadowrocket-Rules/main/HB-Shadowrocke
 - **国内 HTTPDNS 直连** — 微信、京东、阿里、哔哩哔哩、美团、网易、百度等国内应用的 HTTPDNS 入口直接放行，避免拒绝后等待超时和二次解析
 - **分流 DNS** — 直连域名使用 AliDNS / DNSPod 国内 DoH（`dns-direct-system = false`），备用 DNS 同样使用加密 DoH，避免主 DoH 失败时明文回退系统 DNS；代理域名由代理服务器端解析
 - **启用 IPv6、优先 IPv4** — 保留双栈网络能力，减少开启 Shadowrocket 后与系统原生网络路径的差异，同时避免强制优先 IPv6
-- **Tailscale 网段进隧道** — `tun-excluded-routes` 不再包含 `100.64.0.0/10`，改用 `tun-included-routes` + `IP-CIDR,100.64.0.0/10,TAILSCALE`，避免 Tailscale 流量被绕出隧道
+- **Tailscale 网段进隧道** — `tun-excluded-routes` 不再包含 `100.64.0.0/10`，改用 `tun-included-routes` + `IP-CIDR,100.64.0.0/10,TAILSCALE`，避免 Tailscale 流量被绕出隧道；官方手册提示 `tun-excluded-routes` 含该网段会影响 Tailscale
 - **保留** — Apple 直连、Blackmatrix7 公共规则集
 
 ## 规则引用
@@ -48,4 +50,4 @@ https://raw.githubusercontent.com/hanboyd/Shadowrocket-Rules/main/HB-Shadowrocke
 
 ## 最后更新
 
-2026-11-15
+2026-11-16
